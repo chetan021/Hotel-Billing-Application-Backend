@@ -3,6 +3,7 @@ package com.example.BillingApp.Controller;
 import com.example.BillingApp.Entity.Room;
 import com.example.BillingApp.Service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,18 +19,22 @@ public class RoomController {
         this.roomService = roomService;
     }
 
+    // ✅ GET all rooms
     @GetMapping
-    public List<Room> findAll() {
+    public List<Room> getAllRooms() {
         return roomService.findAll();
     }
 
+    // ✅ POST new room
     @PostMapping
-    public Room save(@RequestBody Room room) {
+    public Room createRoom(@RequestBody Room room) {
         return roomService.createRoom(room);
     }
 
-    @DeleteMapping("{id}")
-    public void delete(@PathVariable String id){
+    // ✅ DELETE room
+    @DeleteMapping("/{id}")
+    public void deleteRoom(@PathVariable String id) {
         roomService.deleteRoomByRoomId(id);
     }
 }
+
