@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .cors(cors -> {}) // 👈 enable Spring Security CORS using your WebMvcConfigurer
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/invoices/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

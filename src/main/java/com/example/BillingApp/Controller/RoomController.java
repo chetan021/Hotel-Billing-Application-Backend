@@ -1,8 +1,10 @@
 package com.example.BillingApp.Controller;
 
 import com.example.BillingApp.Entity.Room;
+import com.example.BillingApp.Repository.RoomRepository;
 import com.example.BillingApp.Service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,28 +15,40 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class RoomController {
 
-    private final RoomService roomService;
+    private final RoomRepository roomRepo;
 
-    public RoomController(RoomService roomService) {
-        this.roomService = roomService;
+    public RoomController(RoomRepository roomRepo) {
+        this.roomRepo = roomRepo;
     }
 
-    // ✅ GET all rooms
     @GetMapping
     public List<Room> getAllRooms() {
-        return roomService.findAll();
+        return roomRepo.findAll();
     }
 
-    // ✅ POST new room
     @PostMapping
-    public Room createRoom(@RequestBody Room room) {
-        return roomService.createRoom(room);
+    public Room addRoom(@RequestBody Room room) {
+        room.setRoomStatus("Available"); // default
+        return roomRepo.save(room);
     }
 
-    // ✅ DELETE room
+    @PutMapping("/{id}")
+    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room roomDetails) {
+        return roomRepo.findById(id).map(room -> {
+            room.setRoomNumber(roomDetails.getRoomNumber());
+            room.setRoomType(roomDetails.getRoomType());
+            room.setPricePerNight(roomDetails.getPricePerNight());
+            room.setRoomStatus(roomDetails.getRoomStatus());
+            return ResponseEntity.ok(roomRepo.save(room));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/{id}")
-    public void deleteRoom(@PathVariable String id) {
-        roomService.deleteRoomByRoomId(id);
+    public ResponseEntity<?> deleteRoom(@PathVariable Long id) {
+        return roomRepo.findById(id).map(room -> {
+            roomRepo.delete(room);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 }
 
