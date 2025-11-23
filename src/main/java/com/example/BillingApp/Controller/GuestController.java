@@ -1,7 +1,11 @@
 package com.example.BillingApp.Controller;
 
-import com.example.BillingApp.Entity.Guest;
+import com.example.BillingApp.DTO.GuestDTO;
 import com.example.BillingApp.Service.GuestService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/guests")
 @CrossOrigin(origins = "http://localhost:5173")
 public class GuestController {
+
     private final GuestService guestService;
 
     public GuestController(GuestService guestService) {
@@ -17,22 +22,36 @@ public class GuestController {
     }
 
     @PostMapping
-    public Guest saveGuest(@RequestBody Guest guest) {
-        return guestService.saveGuest(guest);
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<GuestDTO> createGuest(@Valid @RequestBody GuestDTO guestDTO) {
+        GuestDTO created = guestService.saveGuest(guestDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Guest> findAllGuest() {
-        return guestService.getAllGuests();
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<List<GuestDTO>> getAllGuests() {
+        return ResponseEntity.ok(guestService.getAllGuests());
     }
 
     @GetMapping("/{id}")
-    public Guest findById(@PathVariable Long id) {
-        return guestService.getGuestById(id);
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<GuestDTO> getGuestById(@PathVariable Long id) {
+        return ResponseEntity.ok(guestService.getGuestById(id));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<GuestDTO> updateGuest(
+            @PathVariable Long id,
+            @Valid @RequestBody GuestDTO guestDTO) {
+        return ResponseEntity.ok(guestService.updateGuest(id, guestDTO));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteGuest(@PathVariable Long id) {
         guestService.deleteGuestById(id);
+        return ResponseEntity.noContent().build();
     }
 }
