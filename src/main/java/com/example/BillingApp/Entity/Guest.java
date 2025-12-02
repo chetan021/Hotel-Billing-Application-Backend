@@ -22,4 +22,7 @@ public class Guest {
     private String idProofType;
     private String idProofNumber;
 
+    public Guest(long l, String john, String doe, String mail, String number, String s) {
+
+    }
 }
